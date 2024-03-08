@@ -13,9 +13,16 @@ on:
         type: string
         required: true
         default: "['ubuntu-latest', 'windows-latest', 'macOS-latest']"
-
-permissions:
-  contents: read # to fetch code (actions/checkout)
+      fail-fast:
+        default: false
+        description: 'Whether to fail fast or not'
+        required: false
+        type: boolean
+      timeout:
+        default: 10
+        description: 'The number of minutes to wait for the operation to complete.'
+        required: false
+        type: number
 
 jobs:
   show_vars:
@@ -29,10 +36,12 @@ jobs:
 
   build:
     name: Build, lint, and test on Node ${{ matrix.node }} and ${{ matrix.os }}
+    timeout-minutes: ${{ github.event.inputs.timeout }}
     strategy:
       matrix:
         node: ${{ fromJson(github.event.inputs.node_versions) }}
         os: ${{ fromJson(github.event.inputs.os) }}
+      fail-fast: ${{ github.event.inputs.inputs.fail-fast }}
     runs-on: ${{ matrix.os }}
 
     steps:
