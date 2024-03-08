@@ -24,8 +24,8 @@ on:
         required: false
         type: number
 
-#permissions:
-#  contents: read # to fetch code (actions/checkout)
+permissions:
+  contents: read # to fetch code (actions/checkout)
 
 jobs:
   show_vars:
@@ -34,19 +34,20 @@ jobs:
     steps:
       - name: Show variables
         run: |
-          echo "Node versions: ${{ github.event.inputs.node_versions }}"
-          echo "Operating system: ${{ github.event.inputs.os }}"
-          echo "Fail fast: ${{ github.event.inputs.fail-fast }}"
-          echo "Timeout: ${{ github.event.inputs.timeout }}"
+          echo "Node versions: ${{ inputs.node_versions }}"
+          echo "Operating system: ${{ inputs.os }}"
+          echo "Fail fast: ${{ fail-fast }}"
+          echo "Timeout: ${{ inputs.timeout }}"
 
   build:
     name: Build, lint, and test on Node ${{ matrix.node }} and ${{ matrix.os }}
-    timeout-minutes: ${{ github.event.inputs.timeout }}
+    timeout-minutes: ${{ inputs.timeout }}
+
     strategy:
       matrix:
-        node: ${{ fromJson(github.event.inputs.node_versions) }}
-        os: ${{ fromJson(github.event.inputs.os) }}
-      fail-fast: ${{ github.event.inputs.inputs.fail-fast }}
+        node: ${{ fromJson(inputs.node_versions) }}
+        os: ${{ fromJson(inputs.os) }}
+      fail-fast: ${{ inputs.inputs.fail-fast }}
     runs-on: ${{ matrix.os }}
 
     steps:
