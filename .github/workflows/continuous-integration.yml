@@ -29,10 +29,10 @@ permissions:
 
 jobs:
   show_vars:
-    name: Show variables
+    name: '👀 Show variables'
     runs-on: ubuntu-latest
     steps:
-      - name: Show variables
+      - name: '👀 Show variables'
         run: |
           echo "Node versions: ${{ inputs.node_versions }}"
           echo "Operating system: ${{ inputs.os }}"
@@ -40,7 +40,7 @@ jobs:
           echo "Timeout: ${{ inputs.timeout }}"
 
   build:
-    name: Build, lint, and test on Node ${{ matrix.node }} and ${{ matrix.os }}
+    name: 'Build, lint, and test on Node ${{ matrix.node }} and ${{ matrix.os }}'
     timeout-minutes: ${{ inputs.timeout }}
 
     strategy:
@@ -48,8 +48,8 @@ jobs:
         node: ${{ fromJson(inputs.node_versions) }}
         os: ${{ fromJson(inputs.os) }}
       fail-fast: ${{ inputs.fail-fast }}
-    runs-on: ${{ matrix.os }}
 
+    runs-on: ${{ matrix.os }}
     steps:
       - name: '📚 checkout repository'
         uses: actions/checkout@v4
@@ -58,13 +58,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
+          cache: 'npm'
 
       - name: '🗄️ Get cache'
         id: cache
         uses: actions/cache@v4
         with:
-          path: '**/node_modules'
+          path: |
+            node_modules
           key: ${{ runner.os }}-modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-modules
 
       - name: '⚙️ installing dependencies'
         id: install-deps
