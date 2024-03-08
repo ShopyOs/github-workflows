@@ -24,6 +24,9 @@ on:
         required: false
         type: number
 
+#permissions:
+#  contents: read # to fetch code (actions/checkout)
+
 jobs:
   show_vars:
     name: Show variables
@@ -33,6 +36,8 @@ jobs:
         run: |
           echo "Node versions: ${{ github.event.inputs.node_versions }}"
           echo "Operating system: ${{ github.event.inputs.os }}"
+          echo "Fail fast: ${{ github.event.inputs.fail-fast }}"
+          echo "Timeout: ${{ github.event.inputs.timeout }}"
 
   build:
     name: Build, lint, and test on Node ${{ matrix.node }} and ${{ matrix.os }}
