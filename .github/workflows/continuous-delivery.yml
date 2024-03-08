@@ -1,0 +1,69 @@
+name: "Continuous Delivery"
+
+on:
+  workflow_call:
+    inputs:
+      node_version:
+        description: 'Node version to be used for the release'
+        type: string
+        required: true
+        default: ''
+      release_target_branch:
+        description: 'Branch to be used for the release'
+        type: string
+        required: true
+        default: ''
+      release_type:
+        description: 'Release type to be published [major | minor | patch]'
+        type: string
+        required: true
+        default: ''
+
+jobs:
+  publish-npm:
+    name: '🚀 Publish NPM Package'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: '📚 checkout repository'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.release_target_branch }}
+          fetch-depth: 0
+          token: ${{ secrets.BOT_GITHUB_ACCESS_TOKEN }}
+
+      - name: '🟢 setup node'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ github.event.inputs.node_version }}
+          registry-url: https://registry.npmjs.org/
+
+      - name: '⚙️ installing dependencies'
+        run: npm ci
+
+      - name: 'Configure Git access'
+        run: |
+          git config --global user.name github-actions[bot]
+          git config --global user.email github-actions[bot]@github.com
+
+      - name: 'Bump the package version'
+        run: npm version ${{ github.event.inputs.release_type }}
+
+      - name: 'Commit new version to git'
+        run: |
+          git show
+          git push origin ${{ github.event.inputs.release_target_branch }} --follow-tags
+          
+      - name: '🚀 publish to npmjs.org registry'
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
+
+      - name: 'Create Release in repository'
+        run: |
+          RELEASE_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
+          gh release create $RELEASE_TAG --latest --verify-tag
+        env:
+          GH_TOKEN: ${{ secrets.BOT_GITHUB_ACCESS_TOKEN }}
