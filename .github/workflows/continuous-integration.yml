@@ -22,8 +22,8 @@ jobs:
     name: Build, lint, and test on Node ${{ matrix.node }} and ${{ matrix.os }}
     strategy:
       matrix:
-        node: ${{ github.event.inputs.node_versions }}
-        os: ${{ github.event.inputs.os }}
+        node: ${{ fromJson(github.event.inputs.node_versions) }}
+        os: ${{ fromJson(github.event.inputs.os) }}
     runs-on: ${{ matrix.os }}
 
     steps:
