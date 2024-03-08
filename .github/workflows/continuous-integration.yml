@@ -36,7 +36,7 @@ jobs:
         run: |
           echo "Node versions: ${{ inputs.node_versions }}"
           echo "Operating system: ${{ inputs.os }}"
-          echo "Fail fast: ${{ fail-fast }}"
+          echo "Fail fast: ${{ inputs.fail-fast }}"
           echo "Timeout: ${{ inputs.timeout }}"
 
   build:
@@ -47,7 +47,7 @@ jobs:
       matrix:
         node: ${{ fromJson(inputs.node_versions) }}
         os: ${{ fromJson(inputs.os) }}
-      fail-fast: ${{ inputs.inputs.fail-fast }}
+      fail-fast: ${{ inputs.fail-fast }}
     runs-on: ${{ matrix.os }}
 
     steps:
