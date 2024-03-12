@@ -8,5 +8,9 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
     reviewers:
       - "shopyos/maintainers"
