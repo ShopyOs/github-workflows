@@ -1,0 +1,55 @@
+name: "Auto Approve & Merge Dependabot PRs"
+
+on:
+  pull_request_target:
+  workflow_call:
+
+permissions:
+  pull-requests: read
+
+jobs:
+  auto-merge:
+    # only run for dependabot PRs
+    if: ${{ github.actor == 'dependabot[bot]' }}
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+
+    permissions:
+      pull-requests: write
+      contents: write
+
+    steps:
+      - id: dependabot
+        uses: dependabot/fetch-metadata@v1
+        with:
+          github-token: ${{ secrets.BOT_GITHUB_ACCESS_TOKEN }}
+
+      - name: |
+          Auto merge PRs with patch updates for production dependencies and minor updates for development dependencies
+        id: auto-merge
+        if: |
+          (
+            steps.dependabot.outputs.update-type == 'version-update:semver-patch' &&
+            contains(
+              'direct:development,
+                indirect:development,
+                direct:production,
+                indirect:production'
+              , steps.dependabot.outputs.dependency-type
+          ))
+          || (
+            steps.dependabot.outputs.update-type == 'version-update:semver-minor' &&
+            contains(
+              'direct:development,indirect:development'
+              , steps.dependabot.outputs.dependency-type
+          ))
+        run: echo "::notice ::auto-merge conditions satisfied"
+
+      - name: 'Auto approve PR and merge it if conditions are satisfied'
+        if: ${{ steps.auto-merge.conclusion == 'success' }}
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.BOT_GITHUB_ACCESS_TOKEN }}
+        run: |
+          gh pr review --approve "$PR_URL"
+          gh pr merge --auto --rebase "$PR_URL"
