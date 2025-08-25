@@ -52,7 +52,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: '📚 checkout repository'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: '🟢 setup node ${{ matrix.node }}'
         uses: actions/setup-node@v4
